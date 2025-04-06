@@ -6,9 +6,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Platform,
+  Modal,
+  Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Heart } from 'lucide-react-native';
+import { Heart, Calendar, Clock } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 interface BloodPressureReading {
   id: string;
@@ -22,6 +26,9 @@ export default function RecordScreen() {
   const [systolic, setSystolic] = useState('');
   const [diastolic, setDiastolic] = useState('');
   const [heartRate, setHeartRate] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
 
   const saveReading = async () => {
     try {
@@ -34,7 +41,7 @@ export default function RecordScreen() {
         systolic,
         diastolic,
         heartRate,
-        timestamp: Date.now(),
+        timestamp: date.getTime(),
       };
 
       const existingReadings = await AsyncStorage.getItem('bloodPressureReadings');
@@ -47,9 +54,34 @@ export default function RecordScreen() {
       setSystolic('');
       setDiastolic('');
       setHeartRate('');
+      setDate(new Date());
     } catch (error) {
       console.error('Error saving reading:', error);
     }
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      setShowTimePicker(false);
+    }
+    setDate(currentDate);
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   return (
@@ -60,6 +92,22 @@ export default function RecordScreen() {
       </View>
 
       <View style={styles.card}>
+        <View style={styles.dateTimeContainer}>
+          <TouchableOpacity
+            style={styles.dateTimeButton}
+            onPress={() => setShowDatePicker(true)}>
+            <Calendar size={20} color="#475569" />
+            <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.dateTimeButton}
+            onPress={() => setShowTimePicker(true)}>
+            <Clock size={20} color="#475569" />
+            <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Systolic (mmHg)</Text>
           <TextInput
@@ -106,6 +154,46 @@ export default function RecordScreen() {
           <Text style={styles.buttonText}>Save Reading</Text>
         </TouchableOpacity>
       </View>
+
+      {(showDatePicker || showTimePicker) && (Platform.OS === 'web' || Platform.OS === 'ios') && (
+        <Modal
+          transparent={true}
+          visible={showDatePicker || showTimePicker}
+          animationType="fade">
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => {
+              setShowDatePicker(false);
+              setShowTimePicker(false);
+            }}>
+            <View style={styles.modalContent}>
+              <DateTimePicker
+                value={date}
+                mode={showDatePicker ? 'date' : 'time'}
+                display="spinner"
+                onChange={onDateChange}
+                style={styles.picker}
+              />
+              <TouchableOpacity
+                style={styles.doneButton}
+                onPress={() => {
+                  setShowDatePicker(false);
+                  setShowTimePicker(false);
+                }}>
+                <Text style={styles.doneButtonText}>Done</Text>
+              </TouchableOpacity>
+            </View>
+          </Pressable>
+        </Modal>
+      )}
+
+      {(showDatePicker || showTimePicker) && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={date}
+          mode={showDatePicker ? 'date' : 'time'}
+          onChange={onDateChange}
+        />
+      )}
     </ScrollView>
   );
 }
@@ -140,6 +228,26 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 20,
+  },
+  dateTimeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    backgroundColor: '#f8fafc',
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  dateTimeText: {
+    color: '#475569',
+    fontSize: 16,
+  },
   inputGroup: {
     marginBottom: 20,
   },
@@ -168,6 +276,34 @@ const styles = StyleSheet.create({
     backgroundColor: '#94a3b8',
   },
   buttonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 20,
+    width: '90%',
+    maxWidth: 400,
+  },
+  picker: {
+    height: 200,
+  },
+  doneButton: {
+    marginTop: 16,
+    padding: 12,
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  doneButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
