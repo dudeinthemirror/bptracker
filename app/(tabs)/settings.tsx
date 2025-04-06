@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Settings as SettingsIcon, Trash2 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function SettingsScreen() {
   const clearAllReadings = async () => {
@@ -30,45 +31,53 @@ export default function SettingsScreen() {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <SettingsIcon size={32} color="#2563eb" />
-        <Text style={styles.title}>Settings</Text>
-      </View>
+    <LinearGradient
+      colors={['#f0f9ff', '#e0f2fe', '#f0f9ff']}
+      style={styles.gradientBackground}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <SettingsIcon size={24} color="#ffffff" />
+          </View>
+          <Text style={styles.title}>Settings</Text>
+        </View>
 
-      <View style={styles.card}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={clearAllReadings}>
-          <Trash2 size={24} color="#ef4444" />
-          <Text style={styles.buttonText}>Clear All Readings</Text>
-        </TouchableOpacity>
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={clearAllReadings}>
+            <View style={styles.buttonIconContainer}>
+              <Trash2 size={22} color="#ffffff" />
+            </View>
+            <Text style={styles.buttonText}>Clear All Readings</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: '#f8fafc',
   },
   header: {
-    padding: 20,
+    padding: 24,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '600',
-    color: '#1e293b',
-  },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 20,
-    margin: 16,
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0284c7',
+    justifyContent: 'center',
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
@@ -78,17 +87,64 @@ const styles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    letterSpacing: 0.5,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 24,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 16,
     padding: 16,
-    borderRadius: 8,
-    backgroundColor: '#fee2e2',
+    borderRadius: 12,
+    backgroundColor: '#fecaca',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  buttonIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   buttonText: {
-    color: '#ef4444',
-    fontSize: 16,
-    fontWeight: '500',
+    color: '#b91c1c',
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 0.3,
   },
 });

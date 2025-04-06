@@ -1,46 +1,96 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, History, Settings } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
+import { StyleSheet, View } from 'react-native';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: '#ffffff',
-          borderTopColor: '#e5e5e5',
+          position: 'absolute',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          borderTopColor: 'rgba(255, 255, 255, 0.3)',
+          borderTopWidth: 1,
+          elevation: 0,
+          height: 60,
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         },
-        tabBarActiveTintColor: '#2563eb',
+        tabBarBackground: () => (
+          <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+        ),
+        tabBarActiveTintColor: '#0284c7',
         tabBarInactiveTintColor: '#64748b',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginBottom: 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: 6,
+        },
         headerStyle: {
-          backgroundColor: '#ffffff',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
         },
         headerTitleStyle: {
-          color: '#1e293b',
+          color: '#0c4a6e',
           fontSize: 18,
-          fontWeight: '600',
+          fontWeight: '700',
         },
+        headerBackground: () => (
+          <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+        ),
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Record',
-          tabBarIcon: ({ color, size }) => <Home size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={styles.iconWrapper}>
+              <Home size={size-2} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: 'History',
-          tabBarIcon: ({ color, size }) => <History size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={styles.iconWrapper}>
+              <History size={size-2} color={color} />
+            </View>
+          ),
         }}
       />
       <Tabs.Screen
         name="settings"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => <Settings size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <View style={styles.iconWrapper}>
+              <Settings size={size-2} color={color} />
+            </View>
+          ),
         }}
       />
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+});
