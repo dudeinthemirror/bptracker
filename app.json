@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Blood Pressure Tracker",
+    "slug": "blood-pressure-tracker",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bloodpressuretracker",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.bloodpressuretracker",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch"],
+        "NSHealthShareUsageDescription": "This app needs access to health data to save your blood pressure readings to Apple Health.",
+        "NSHealthUpdateUsageDescription": "This app needs access to health data to save your blood pressure readings to Apple Health."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
