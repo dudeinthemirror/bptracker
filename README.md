@@ -1,3 +1,5 @@
+NOTE: this was built almost entirely by Cline (with Claude 3.7 Sonnet). I also used bolt.new to create the very first bare-bones skeleton of the app. The intent was to test Cline's agentic capabilities. Conclusion: they are quite impressive! "Meesa likes!"
+
 # Blood Pressure Tracker
 
 A mobile application for tracking and visualizing blood pressure readings over time. Built with React Native and Expo.
@@ -6,9 +8,10 @@ A mobile application for tracking and visualizing blood pressure readings over t
 
 - **Record Blood Pressure Readings**: Easily input systolic, diastolic, and heart rate values with date and time
 - **View Reading History**: See all your past readings with color-coded status indicators
-- **Visualize Trends**: Track your blood pressure trends over time with interactive graphs
+- **Visualize Trends**: Track your blood pressure trends over time with graphs
 - **Edit and Annotate**: Add notes to readings and edit past entries
 - **Data Persistence**: All readings are stored locally on your device
+- **Platforms Supported**: iOS, Android, Web
 
 ## Screenshots
 
