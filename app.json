@@ -3,7 +3,7 @@
     "name": "Blood Pressure Tracker",
     "slug": "blood-pressure-tracker",
     "version": "1.0.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/images/icon.png",
     "scheme": "bloodpressuretracker",
     "userInterfaceStyle": "automatic",

@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Chrome as Home, History, Settings } from 'lucide-react-native';
+import { Chrome as Home, History, Settings, BarChart2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, View } from 'react-native';
 
@@ -68,6 +68,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <View style={styles.iconWrapper}>
               <History size={size-2} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="graph"
+        options={{
+          title: 'Graph',
+          tabBarIcon: ({ color, size }) => (
+            <View style={styles.iconWrapper}>
+              <BarChart2 size={size-2} color={color} />
             </View>
           ),
         }}
