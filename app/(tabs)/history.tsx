@@ -10,6 +10,7 @@ import {
   Pressable,
   TextInput,
   Alert,
+  useWindowDimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Activity, X, FileText } from 'lucide-react-native';
@@ -28,6 +29,8 @@ export default function HistoryScreen() {
   const [readings, setReadings] = useState<BloodPressureReading[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   const [selectedStatus, setSelectedStatus] = useState<{
     color: string;
     title: string;
@@ -182,7 +185,10 @@ export default function HistoryScreen() {
             return (
               <TouchableOpacity 
                 key={reading.id} 
-                style={styles.card}
+                style={[
+                  styles.card,
+                  isLandscape && styles.cardLandscape
+                ]}
                 onPress={() => handleEditReading(reading)}
                 activeOpacity={0.7}
               >
@@ -455,6 +461,11 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  cardLandscape: {
+    width: '85%',
+    alignSelf: 'center',
+    marginHorizontal: 'auto',
   },
   readingHeader: {
     flexDirection: 'row',

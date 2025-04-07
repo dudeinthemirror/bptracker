@@ -1,9 +1,11 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, History, Settings, BarChart2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, useWindowDimensions } from 'react-native';
 
 export default function TabLayout() {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
   return (
     <Tabs
       screenOptions={{
@@ -13,7 +15,7 @@ export default function TabLayout() {
           borderTopColor: 'rgba(255, 255, 255, 0.3)',
           borderTopWidth: 1,
           elevation: 0,
-          height: 60,
+          height: isLandscape ? 45 : 60, // Reduce height in landscape mode
           shadowColor: '#000',
           shadowOffset: {
             width: 0,
@@ -21,6 +23,7 @@ export default function TabLayout() {
           },
           shadowOpacity: 0.1,
           shadowRadius: 4,
+          paddingBottom: isLandscape ? 0 : 4, // Reduce padding in landscape mode
         },
         tabBarBackground: () => (
           <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
@@ -28,12 +31,12 @@ export default function TabLayout() {
         tabBarActiveTintColor: '#0284c7',
         tabBarInactiveTintColor: '#64748b',
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: isLandscape ? 10 : 12,
           fontWeight: '500',
-          marginBottom: 4,
+          marginBottom: isLandscape ? 2 : 4,
         },
         tabBarItemStyle: {
-          paddingVertical: 6,
+          paddingVertical: isLandscape ? 3 : 6,
         },
         headerStyle: {
           backgroundColor: 'rgba(255, 255, 255, 0.8)',
@@ -55,8 +58,8 @@ export default function TabLayout() {
         options={{
           title: 'Record',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconWrapper}>
-              <Home size={size-2} color={color} />
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <Home size={isLandscape ? size-4 : size-2} color={color} />
             </View>
           ),
         }}
@@ -66,8 +69,8 @@ export default function TabLayout() {
         options={{
           title: 'History',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconWrapper}>
-              <History size={size-2} color={color} />
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <History size={isLandscape ? size-4 : size-2} color={color} />
             </View>
           ),
         }}
@@ -77,8 +80,8 @@ export default function TabLayout() {
         options={{
           title: 'Graph',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconWrapper}>
-              <BarChart2 size={size-2} color={color} />
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <BarChart2 size={isLandscape ? size-4 : size-2} color={color} />
             </View>
           ),
         }}
@@ -88,8 +91,8 @@ export default function TabLayout() {
         options={{
           title: 'Settings',
           tabBarIcon: ({ color, size }) => (
-            <View style={styles.iconWrapper}>
-              <Settings size={size-2} color={color} />
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <Settings size={isLandscape ? size-4 : size-2} color={color} />
             </View>
           ),
         }}
@@ -103,5 +106,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 4,
+  },
+  iconWrapperLandscape: {
+    marginTop: 2,
   },
 });
