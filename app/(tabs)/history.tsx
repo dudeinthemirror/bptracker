@@ -10,7 +10,7 @@ import {
   Pressable,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Activity, X } from 'lucide-react-native';
+import { Activity, X, FileText } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface BloodPressureReading {
@@ -19,6 +19,7 @@ interface BloodPressureReading {
   diastolic: string;
   heartRate: string;
   timestamp: number;
+  note?: string;
 }
 
 export default function HistoryScreen() {
@@ -30,6 +31,8 @@ export default function HistoryScreen() {
     title: string;
     description: string;
   } | null>(null);
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
 
   const loadReadings = async () => {
     try {
@@ -159,6 +162,18 @@ export default function HistoryScreen() {
                     <Text style={styles.readingLabel}>Heart Rate</Text>
                   </View>
                 </View>
+                
+                {reading.note && (
+                  <TouchableOpacity 
+                    style={styles.noteIconContainer}
+                    onPress={() => {
+                      setSelectedNote(reading.note || null);
+                      setNoteModalVisible(true);
+                    }}
+                  >
+                    <FileText size={20} color="#0284c7" />
+                  </TouchableOpacity>
+                )}
               </View>
             );
           })
@@ -187,6 +202,31 @@ export default function HistoryScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>{selectedStatus?.description}</Text>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={noteModalVisible}
+        animationType="fade"
+        onRequestClose={() => setNoteModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setNoteModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Note</Text>
+              <TouchableOpacity
+                onPress={() => setNoteModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>{selectedNote}</Text>
           </View>
         </Pressable>
       </Modal>
@@ -254,7 +294,7 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    borderRadius: 16,
+    borderRadius: 18,
     padding: 20,
     margin: 16,
     marginTop: 0,
@@ -364,5 +404,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
     color: '#334155',
+  },
+  noteIconContainer: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
   },
 });

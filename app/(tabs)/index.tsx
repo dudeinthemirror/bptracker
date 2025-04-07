@@ -21,12 +21,14 @@ interface BloodPressureReading {
   diastolic: string;
   heartRate: string;
   timestamp: number;
+  note?: string;
 }
 
 export default function RecordScreen() {
   const [systolic, setSystolic] = useState('');
   const [diastolic, setDiastolic] = useState('');
   const [heartRate, setHeartRate] = useState('');
+  const [note, setNote] = useState('');
   const [date, setDate] = useState(new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -43,6 +45,7 @@ export default function RecordScreen() {
         diastolic,
         heartRate,
         timestamp: date.getTime(),
+        note: note.trim() || undefined,
       };
 
       const existingReadings = await AsyncStorage.getItem('bloodPressureReadings');
@@ -55,6 +58,7 @@ export default function RecordScreen() {
       setSystolic('');
       setDiastolic('');
       setHeartRate('');
+      setNote('');
       setDate(new Date());
     } catch (error) {
       console.error('Error saving reading:', error);
@@ -154,6 +158,19 @@ export default function RecordScreen() {
               placeholder="75"
               placeholderTextColor="#94a3b8"
               maxLength={3}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Note (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={note}
+              onChangeText={setNote}
+              placeholder="Add a note about this reading"
+              placeholderTextColor="#94a3b8"
+              multiline={true}
+              numberOfLines={2}
             />
           </View>
 
