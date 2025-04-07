@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   Modal,
   Pressable,
+  TextInput,
+  Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Activity, X, FileText } from 'lucide-react-native';
@@ -33,6 +35,58 @@ export default function HistoryScreen() {
   } | null>(null);
   const [noteModalVisible, setNoteModalVisible] = useState(false);
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingReading, setEditingReading] = useState<BloodPressureReading | null>(null);
+  const [editedSystolic, setEditedSystolic] = useState('');
+  const [editedDiastolic, setEditedDiastolic] = useState('');
+  const [editedHeartRate, setEditedHeartRate] = useState('');
+  const [editedNote, setEditedNote] = useState('');
+
+  const handleEditReading = (reading: BloodPressureReading) => {
+    setEditingReading(reading);
+    setEditedSystolic(reading.systolic);
+    setEditedDiastolic(reading.diastolic);
+    setEditedHeartRate(reading.heartRate);
+    setEditedNote(reading.note || '');
+    setEditModalVisible(true);
+  };
+
+  const saveEditedReading = async () => {
+    if (!editingReading) return;
+    
+    // Validate inputs
+    if (!editedSystolic || !editedDiastolic || !editedHeartRate) {
+      Alert.alert('Error', 'All fields except note are required');
+      return;
+    }
+
+    try {
+      // Create updated reading
+      const updatedReading: BloodPressureReading = {
+        ...editingReading,
+        systolic: editedSystolic,
+        diastolic: editedDiastolic,
+        heartRate: editedHeartRate,
+        note: editedNote || undefined
+      };
+
+      // Update the reading in the array
+      const updatedReadings = readings.map(r => 
+        r.id === updatedReading.id ? updatedReading : r
+      );
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem('bloodPressureReadings', JSON.stringify(updatedReadings));
+      
+      // Update state
+      setReadings(updatedReadings);
+      setEditModalVisible(false);
+      setEditingReading(null);
+    } catch (error) {
+      console.error('Error saving edited reading:', error);
+      Alert.alert('Error', 'Failed to save changes');
+    }
+  };
 
   const loadReadings = async () => {
     try {
@@ -126,11 +180,19 @@ export default function HistoryScreen() {
             const statusInfo = getStatusInfo(systolicNum, diastolicNum);
             
             return (
-              <View key={reading.id} style={styles.card}>
+              <TouchableOpacity 
+                key={reading.id} 
+                style={styles.card}
+                onPress={() => handleEditReading(reading)}
+                activeOpacity={0.7}
+              >
                 <View style={styles.readingHeader}>
                   <Text style={styles.timestamp}>{formatDate(reading.timestamp)}</Text>
                   <TouchableOpacity
-                    onPress={() => showStatusModal(systolicNum, diastolicNum)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      showStatusModal(systolicNum, diastolicNum);
+                    }}
                     activeOpacity={0.7}
                   >
                     <View
@@ -166,7 +228,8 @@ export default function HistoryScreen() {
                 {reading.note && (
                   <TouchableOpacity 
                     style={styles.noteIconContainer}
-                    onPress={() => {
+                    onPress={(e) => {
+                      e.stopPropagation();
                       setSelectedNote(reading.note || null);
                       setNoteModalVisible(true);
                     }}
@@ -174,7 +237,7 @@ export default function HistoryScreen() {
                     <FileText size={20} color="#0284c7" />
                   </TouchableOpacity>
                 )}
-              </View>
+              </TouchableOpacity>
             );
           })
         )}
@@ -227,6 +290,90 @@ export default function HistoryScreen() {
               </TouchableOpacity>
             </View>
             <Text style={styles.modalDescription}>{selectedNote}</Text>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={editModalVisible}
+        animationType="fade"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {}}
+        >
+          <View style={styles.editModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Reading</Text>
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Systolic</Text>
+              <TextInput
+                style={styles.input}
+                value={editedSystolic}
+                onChangeText={setEditedSystolic}
+                keyboardType="numeric"
+                placeholder="Systolic"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Diastolic</Text>
+              <TextInput
+                style={styles.input}
+                value={editedDiastolic}
+                onChangeText={setEditedDiastolic}
+                keyboardType="numeric"
+                placeholder="Diastolic"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Heart Rate</Text>
+              <TextInput
+                style={styles.input}
+                value={editedHeartRate}
+                onChangeText={setEditedHeartRate}
+                keyboardType="numeric"
+                placeholder="Heart Rate"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Note (optional)</Text>
+              <TextInput
+                style={[styles.input, styles.noteInput]}
+                value={editedNote}
+                onChangeText={setEditedNote}
+                placeholder="Add a note"
+                multiline
+              />
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={saveEditedReading}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </Pressable>
       </Modal>
@@ -425,5 +572,72 @@ const styles = StyleSheet.create({
     elevation: 2,
     borderWidth: 1,
     borderColor: '#e2e8f0',
+  },
+  editModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 450,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0c4a6e',
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#334155',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  noteInput: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  button: {
+    borderRadius: 8,
+    padding: 14,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f1f5f9',
+    marginRight: 12,
+  },
+  saveButton: {
+    backgroundColor: '#0284c7',
+    marginLeft: 12,
+  },
+  cancelButtonText: {
+    color: '#64748b',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
