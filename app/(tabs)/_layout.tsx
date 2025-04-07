@@ -1,11 +1,13 @@
 import { Tabs } from 'expo-router';
 import { Chrome as Home, History, Settings, BarChart2 } from 'lucide-react-native';
 import { BlurView } from 'expo-blur';
-import { StyleSheet, View, useWindowDimensions } from 'react-native';
+import { StyleSheet, View, useWindowDimensions, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function TabLayout() {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const insets = useSafeAreaInsets();
   return (
     <Tabs
       screenOptions={{
@@ -23,7 +25,7 @@ export default function TabLayout() {
           },
           shadowOpacity: 0.1,
           shadowRadius: 4,
-          paddingBottom: isLandscape ? 0 : 4, // Reduce padding in landscape mode
+          paddingBottom: isLandscape ? 4 : Math.max(10, insets.bottom), // Add padding for home indicator
         },
         tabBarBackground: () => (
           <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
