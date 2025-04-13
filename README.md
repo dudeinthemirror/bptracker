@@ -15,19 +15,27 @@ A mobile application for tracking and visualizing blood pressure readings over t
 
 ## Screenshots
 
-> *Note: Screenshots should be added here. Below are placeholder descriptions for the screenshots that would enhance this README.*
 
 ### Record Screen
 *Screenshot showing the main recording interface where users can input blood pressure values*
 
+<img src="./assets/images/record.png" width="50%" alt="record">
+
 ### History Screen
 *Screenshot showing the history view with color-coded readings*
+
+<img src="./assets/images/history.png" width="50%" alt="history">
 
 ### Graph Screen
 *Screenshot showing the trend visualization with the line chart*
 
+<img src="./assets/images/graph.png" width="50%" alt="graph">
+
+
 ### Settings Screen
 *Screenshot showing the settings interface*
+
+<img src="./assets/images/settings.png" width="50%" alt="settings">
 
 ## Developer Guide
 
