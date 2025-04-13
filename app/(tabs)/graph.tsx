@@ -23,7 +23,7 @@ interface BloodPressureReading {
   note?: string;
 }
 
-type TimeRange = '3days' | 'week';
+type TimeRange = '3days' | 'week' | 'month';
 
 export default function GraphScreen() {
   const [readings, setReadings] = useState<BloodPressureReading[]>([]);
@@ -60,8 +60,10 @@ export default function GraphScreen() {
 
     if (timeRange === '3days') {
       cutoffTime = now.getTime() - 3 * msInDay;
-    } else { // week
+    } else if (timeRange === 'week') {
       cutoffTime = now.getTime() - 7 * msInDay;
+    } else { // month
+      cutoffTime = now.getTime() - 30 * msInDay;
     }
 
     return readings.filter(reading => reading.timestamp >= cutoffTime);
@@ -174,6 +176,22 @@ export default function GraphScreen() {
                 ]}
               >
                 Week
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.timeRangeButton,
+                timeRange === 'month' && styles.timeRangeButtonActive,
+              ]}
+              onPress={() => setTimeRange('month')}
+            >
+              <Text
+                style={[
+                  styles.timeRangeText,
+                  timeRange === 'month' && styles.timeRangeTextActive,
+                ]}
+              >
+                Month
               </Text>
             </TouchableOpacity>
           </View>
