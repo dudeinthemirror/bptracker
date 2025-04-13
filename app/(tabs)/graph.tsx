@@ -8,20 +8,12 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   useWindowDimensions,
+  Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { BarChart2 } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LineChart } from 'react-native-chart-kit';
-
-interface BloodPressureReading {
-  id: string;
-  systolic: string;
-  diastolic: string;
-  heartRate: string;
-  timestamp: number;
-  note?: string;
-}
+import { readingsApi, BloodPressureReading } from '../services/api';
 
 type TimeRange = '3days' | 'week' | 'month';
 
@@ -35,17 +27,19 @@ export default function GraphScreen() {
   const loadReadings = async () => {
     try {
       setLoading(true);
-      const storedReadings = await AsyncStorage.getItem('bloodPressureReadings');
-      if (storedReadings) {
-        const parsedReadings = JSON.parse(storedReadings);
-        setReadings(parsedReadings.sort((a: BloodPressureReading, b: BloodPressureReading) => 
-          a.timestamp - b.timestamp
-        ));
-      }
+      const response = await readingsApi.getAll();
+      // Check if response is an array
+      const fetchedReadings = Array.isArray(response) ? response : [];
+      
+      // Sort by timestamp (convert ISO string to Date for comparison)
+      setReadings(fetchedReadings.sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      ));
       setLoading(false);
     } catch (error) {
       console.error('Error loading readings:', error);
       setLoading(false);
+      Alert.alert('Error', 'Failed to load readings');
     }
   };
 
@@ -56,17 +50,17 @@ export default function GraphScreen() {
   const getFilteredReadings = () => {
     const now = new Date();
     const msInDay = 24 * 60 * 60 * 1000;
-    let cutoffTime: number;
+    let cutoffTime: Date;
 
     if (timeRange === '3days') {
-      cutoffTime = now.getTime() - 3 * msInDay;
+      cutoffTime = new Date(now.getTime() - 3 * msInDay);
     } else if (timeRange === 'week') {
-      cutoffTime = now.getTime() - 7 * msInDay;
+      cutoffTime = new Date(now.getTime() - 7 * msInDay);
     } else { // month
-      cutoffTime = now.getTime() - 30 * msInDay;
+      cutoffTime = new Date(now.getTime() - 30 * msInDay);
     }
 
-    return readings.filter(reading => reading.timestamp >= cutoffTime);
+    return readings.filter(reading => new Date(reading.timestamp) >= cutoffTime);
   };
 
   const formatChartData = () => {
@@ -92,9 +86,9 @@ export default function GraphScreen() {
     });
 
     // Get data for each dataset
-    const systolicData = filteredReadings.map(reading => parseInt(reading.systolic));
-    const diastolicData = filteredReadings.map(reading => parseInt(reading.diastolic));
-    const heartRateData = filteredReadings.map(reading => parseInt(reading.heartRate));
+    const systolicData = filteredReadings.map(reading => reading.systolic);
+    const diastolicData = filteredReadings.map(reading => reading.diastolic);
+    const heartRateData = filteredReadings.map(reading => reading.heart_rate);
 
     return {
       labels,

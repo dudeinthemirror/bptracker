@@ -9,20 +9,12 @@ import {
   Platform,
   Modal,
   Pressable,
+  Alert,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Heart, Calendar, Clock } from 'lucide-react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
-
-interface BloodPressureReading {
-  id: string;
-  systolic: string;
-  diastolic: string;
-  heartRate: string;
-  timestamp: number;
-  note?: string;
-}
+import { readingsApi, BloodPressureReading } from '../services/api';
 
 export default function RecordScreen() {
   const [systolic, setSystolic] = useState('');
@@ -39,20 +31,15 @@ export default function RecordScreen() {
         return;
       }
 
-      const reading: BloodPressureReading = {
-        id: Date.now().toString(),
-        systolic,
-        diastolic,
-        heartRate,
-        timestamp: date.getTime(),
+      const reading = {
+        systolic: parseInt(systolic),
+        diastolic: parseInt(diastolic),
+        heart_rate: parseInt(heartRate),
+        timestamp: date.toISOString(),
         note: note.trim() || undefined,
       };
 
-      const existingReadings = await AsyncStorage.getItem('bloodPressureReadings');
-      const readings = existingReadings ? JSON.parse(existingReadings) : [];
-      readings.push(reading);
-
-      await AsyncStorage.setItem('bloodPressureReadings', JSON.stringify(readings));
+      await readingsApi.create(reading);
 
       // Reset form
       setSystolic('');
@@ -60,8 +47,11 @@ export default function RecordScreen() {
       setHeartRate('');
       setNote('');
       setDate(new Date());
+      
+      Alert.alert('Success', 'Reading saved successfully');
     } catch (error) {
       console.error('Error saving reading:', error);
+      Alert.alert('Error', 'Failed to save reading. Please try again.');
     }
   };
 

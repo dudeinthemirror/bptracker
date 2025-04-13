@@ -12,18 +12,9 @@ import {
   Alert,
   useWindowDimensions,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Activity, X, FileText } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-
-interface BloodPressureReading {
-  id: string;
-  systolic: string;
-  diastolic: string;
-  heartRate: string;
-  timestamp: number;
-  note?: string;
-}
+import { readingsApi, BloodPressureReading } from '../services/api';
 
 export default function HistoryScreen() {
   const [readings, setReadings] = useState<BloodPressureReading[]>([]);
@@ -40,16 +31,16 @@ export default function HistoryScreen() {
   const [selectedNote, setSelectedNote] = useState<string | null>(null);
   const [editModalVisible, setEditModalVisible] = useState(false);
   const [editingReading, setEditingReading] = useState<BloodPressureReading | null>(null);
-  const [editedSystolic, setEditedSystolic] = useState('');
-  const [editedDiastolic, setEditedDiastolic] = useState('');
-  const [editedHeartRate, setEditedHeartRate] = useState('');
+  const [editedSystolic, setEditedSystolic] = useState<string>('');
+  const [editedDiastolic, setEditedDiastolic] = useState<string>('');
+  const [editedHeartRate, setEditedHeartRate] = useState<string>('');
   const [editedNote, setEditedNote] = useState('');
 
   const handleEditReading = (reading: BloodPressureReading) => {
     setEditingReading(reading);
-    setEditedSystolic(reading.systolic);
-    setEditedDiastolic(reading.diastolic);
-    setEditedHeartRate(reading.heartRate);
+    setEditedSystolic(reading.systolic.toString());
+    setEditedDiastolic(reading.diastolic.toString());
+    setEditedHeartRate(reading.heart_rate.toString());
     setEditedNote(reading.note || '');
     setEditModalVisible(true);
   };
@@ -65,26 +56,25 @@ export default function HistoryScreen() {
 
     try {
       // Create updated reading
-      const updatedReading: BloodPressureReading = {
-        ...editingReading,
-        systolic: editedSystolic,
-        diastolic: editedDiastolic,
-        heartRate: editedHeartRate,
-        note: editedNote || undefined
+      const updatedReading = {
+        systolic: parseInt(editedSystolic),
+        diastolic: parseInt(editedDiastolic),
+        heart_rate: parseInt(editedHeartRate),
+        note: editedNote || undefined,
+        // We don't need to include timestamp as we're not changing it
       };
 
-      // Update the reading in the array
-      const updatedReadings = readings.map(r => 
-        r.id === updatedReading.id ? updatedReading : r
-      );
-
-      // Save to AsyncStorage
-      await AsyncStorage.setItem('bloodPressureReadings', JSON.stringify(updatedReadings));
+      // Update the reading via API
+      await readingsApi.update(editingReading.id, updatedReading);
       
-      // Update state
-      setReadings(updatedReadings);
+      // Refresh readings
+      await loadReadings();
+      
+      // Close modal
       setEditModalVisible(false);
       setEditingReading(null);
+      
+      Alert.alert('Success', 'Reading updated successfully');
     } catch (error) {
       console.error('Error saving edited reading:', error);
       Alert.alert('Error', 'Failed to save changes');
@@ -93,29 +83,32 @@ export default function HistoryScreen() {
 
   const loadReadings = async () => {
     try {
-      const storedReadings = await AsyncStorage.getItem('bloodPressureReadings');
-      if (storedReadings) {
-        const parsedReadings = JSON.parse(storedReadings);
-        setReadings(parsedReadings.sort((a: BloodPressureReading, b: BloodPressureReading) => 
-          b.timestamp - a.timestamp
-        ));
-      }
+      setRefreshing(true);
+      const response = await readingsApi.getAll();
+      // Check if response is an array
+      const fetchedReadings = Array.isArray(response) ? response : [];
+      
+      // Sort by timestamp (convert ISO string to Date for comparison)
+      setReadings(fetchedReadings.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ));
+      setRefreshing(false);
     } catch (error) {
       console.error('Error loading readings:', error);
+      setRefreshing(false);
+      Alert.alert('Error', 'Failed to load readings');
     }
   };
 
-  const onRefresh = async () => {
-    setRefreshing(true);
-    await loadReadings();
-    setRefreshing(false);
+  const onRefresh = () => {
+    loadReadings();
   };
 
   useEffect(() => {
     loadReadings();
   }, []);
 
-  const formatDate = (timestamp: number) => {
+  const formatDate = (timestamp: string) => {
     return new Date(timestamp).toLocaleString(undefined, {
       year: 'numeric',
       month: 'numeric',
@@ -178,8 +171,8 @@ export default function HistoryScreen() {
           </View>
         ) : (
           readings.map((reading) => {
-            const systolicNum = parseInt(reading.systolic);
-            const diastolicNum = parseInt(reading.diastolic);
+            const systolicNum = reading.systolic;
+            const diastolicNum = reading.diastolic;
             const statusInfo = getStatusInfo(systolicNum, diastolicNum);
             
             return (
@@ -226,7 +219,7 @@ export default function HistoryScreen() {
                   <View style={[styles.divider, { backgroundColor: statusInfo.color }]} />
                   
                   <View style={styles.readingItem}>
-                    <Text style={styles.readingValue}>{reading.heartRate}</Text>
+                    <Text style={styles.readingValue}>{reading.heart_rate}</Text>
                     <Text style={styles.readingLabel}>Heart Rate</Text>
                   </View>
                 </View>
