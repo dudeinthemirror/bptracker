@@ -10,7 +10,7 @@ A mobile application for tracking and visualizing blood pressure readings over t
 - **View Reading History**: See all your past readings with color-coded status indicators
 - **Visualize Trends**: Track your blood pressure trends over time with graphs
 - **Edit and Annotate**: Add notes to readings and edit past entries
-- **Data Persistence**: All readings are stored locally on your device
+- **Data Persistence**: All readings are stored in a PostgreSQL database via the bptracker-backend API
 - **Platforms Supported**: iOS, Android, Web
 
 ## Screenshots
@@ -37,6 +37,21 @@ A mobile application for tracking and visualizing blood pressure readings over t
 
 <img src="./assets/images/settings.png" width="50%" alt="settings">
 
+## Backend Integration
+
+This application uses the [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) API to store blood pressure readings in a PostgreSQL database. The backend provides RESTful endpoints for creating, reading, updating, and deleting blood pressure readings.
+
+### Important Note for Developers
+
+Before running the application, you must start the bptracker-backend server:
+
+1. Clone the backend repository: `git clone https://github.com/dudeinthemirror/bptracker-backend.git`
+2. Follow the setup instructions in the backend repository's README
+3. Start the backend server
+4. Once the backend server is running, you can start this application
+
+The application is configured to connect to the backend at `http://127.0.0.1:8078`. If your backend is running on a different host or port, update the `API_BASE_URL` in `app/services/api.ts`.
+
 ## Developer Guide
 
 ### Prerequisites
@@ -44,14 +59,15 @@ A mobile application for tracking and visualizing blood pressure readings over t
 - [Node.js](https://nodejs.org/) (v14 or newer)
 - [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
 - [Expo CLI](https://docs.expo.dev/workflow/expo-cli/)
+- [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) server running
 
 ### Setup and Running Locally
 
 1. **Clone the repository**
 
    ```bash
-   git clone https://github.com/yourusername/blood-pressure-tracker.git
-   cd blood-pressure-tracker
+   git clone https://github.com/dudeinthemirror/bptracker.git
+   cd bptracker
    ```
 
 2. **Install dependencies**
@@ -108,10 +124,11 @@ expo build:android
 - [React Native](https://reactnative.dev/)
 - [Expo](https://expo.dev/)
 - [React Navigation](https://reactnavigation.org/)
-- [AsyncStorage](https://react-native-async-storage.github.io/async-storage/)
+- [Axios](https://axios-http.com/) - HTTP client for API requests
 - [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
 - [Lucide Icons](https://lucide.dev/)
 - [Expo Linear Gradient](https://docs.expo.dev/versions/latest/sdk/linear-gradient/)
+- [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) - Backend API server
 
 ## License
 
