@@ -1,0 +1,2332 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.bolt/
+  config.json
+app/
+  (tabs)/
+    _layout.tsx
+    graph.tsx
+    history.tsx
+    index.tsx
+    settings.tsx
+  services/
+    api.ts
+  _layout.tsx
+  +not-found.tsx
+hooks/
+  useFrameworkReady.ts
+.gitignore
+.prettierrc
+app.json
+LICENSE
+package.json
+README.md
+repomix.config.json
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="repomix.config.json">
+{
+  "$schema": "https://repomix.com/schemas/latest/schema.json",
+  "input": {
+    "maxFileSize": 52428800
+  },
+  "output": {
+    "filePath": "repomix-output.xml",
+    "style": "xml",
+    "parsableStyle": false,
+    "fileSummary": true,
+    "directoryStructure": true,
+    "files": true,
+    "removeComments": false,
+    "removeEmptyLines": false,
+    "compress": false,
+    "topFilesLength": 5,
+    "showLineNumbers": false,
+    "copyToClipboard": false,
+    "git": {
+      "sortByChanges": true,
+      "sortByChangesMaxCommits": 100,
+      "includeDiffs": false
+    }
+  },
+  "include": [],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": []
+  },
+  "security": {
+    "enableSecurityCheck": true
+  },
+  "tokenCount": {
+    "encoding": "o200k_base"
+  }
+}
+</file>
+
+<file path=".bolt/config.json">
+{
+  "template": "bolt-expo"
+}
+</file>
+
+<file path="app/services/api.ts">
+import axios from 'axios';
+
+// Define the base URL for the API
+const API_BASE_URL = 'http://127.0.0.1:8078';
+
+// Create an axios instance with the base URL
+const api = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Define the BloodPressureReading interface
+export interface BloodPressureReading {
+  id: string;
+  systolic: number;
+  diastolic: number;
+  heart_rate: number;  // Changed from heartRate to heart_rate to match API
+  timestamp: string;   // Changed from number to string to match API
+  note?: string;
+}
+
+// Define the interface for creating a reading (matches API expectations)
+export interface CreateReadingDto {
+  systolic: number;
+  diastolic: number;
+  heart_rate: number;
+  timestamp: string;
+  note?: string;
+}
+
+// API functions for blood pressure readings
+export const readingsApi = {
+  // Get all readings
+  getAll: async (): Promise<BloodPressureReading[]> => {
+    try {
+      const response = await api.get('/readings/');
+      // The API returns an object with a "readings" property that contains the array
+      if (response.data && response.data.readings && Array.isArray(response.data.readings)) {
+        return response.data.readings;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error fetching readings:', error);
+      throw error;
+    }
+  },
+
+  // Get a specific reading by ID
+  getById: async (id: string): Promise<BloodPressureReading> => {
+    try {
+      const response = await api.get(`/readings/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching reading with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Create a new reading
+  create: async (reading: CreateReadingDto): Promise<BloodPressureReading> => {
+    try {
+      const response = await api.post('/readings/', reading);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating reading:', error);
+      throw error;
+    }
+  },
+
+  // Update an existing reading
+  update: async (id: string, reading: Partial<CreateReadingDto>): Promise<BloodPressureReading> => {
+    try {
+      const response = await api.put(`/readings/${id}`, reading);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating reading with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Delete a reading
+  delete: async (id: string): Promise<void> => {
+    try {
+      await api.delete(`/readings/${id}`);
+    } catch (error) {
+      console.error(`Error deleting reading with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // Delete all readings
+  deleteAll: async (): Promise<void> => {
+    try {
+      await api.delete('/readings/');
+    } catch (error) {
+      console.error('Error deleting all readings:', error);
+      throw error;
+    }
+  }
+};
+
+export default api;
+</file>
+
+<file path="app/+not-found.tsx">
+import { Link, Stack } from 'expo-router';
+import { StyleSheet, Text, View } from 'react-native';
+
+export default function NotFoundScreen() {
+  return (
+    <>
+      <Stack.Screen options={{ title: 'Oops!' }} />
+      <View style={styles.container}>
+        <Text style={styles.text}>This screen doesn't exist.</Text>
+        <Link href="/" style={styles.link}>
+          <Text>Go to home screen!</Text>
+        </Link>
+      </View>
+    </>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20,
+  },
+  text: {
+    fontSize: 20,
+    fontWeight: 600,
+  },
+  link: {
+    marginTop: 15,
+    paddingVertical: 15,
+  },
+});
+</file>
+
+<file path="hooks/useFrameworkReady.ts">
+import { useEffect } from 'react';
+
+declare global {
+  interface Window {
+    frameworkReady?: () => void;
+  }
+}
+
+export function useFrameworkReady() {
+  useEffect(() => {
+    window.frameworkReady?.();
+  });
+}
+</file>
+
+<file path=".gitignore">
+# dependencies
+node_modules/
+
+# expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# native
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# metro
+.metro-health-check*
+
+# debug
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+
+# macos
+.DS_Store
+*.pem
+
+# local env files
+.env*.local
+
+# typescript
+*.tsbuildinfo
+</file>
+
+<file path=".prettierrc">
+{
+  "useTabs": false,
+  "bracketSpacing": true,
+  "singleQuote": true,
+  "tabWidth": 2
+}
+</file>
+
+<file path="LICENSE">
+MIT License
+
+Copyright (c) 2025 Luc Masalar
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+    ".expo/types/**/*.ts",
+    "expo-env.d.ts",
+    "nativewind-env.d.ts"
+  ]
+}
+</file>
+
+<file path="app/(tabs)/settings.tsx">
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Settings as SettingsIcon, Trash2 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
+export default function SettingsScreen() {
+  const clearAllReadings = async () => {
+    Alert.alert(
+      'Clear All Readings',
+      'Are you sure you want to delete all readings? This action cannot be undone.',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('bloodPressureReadings');
+              Alert.alert('Success', 'All readings have been deleted.');
+            } catch (error) {
+              console.error('Error clearing readings:', error);
+              Alert.alert('Error', 'Failed to clear readings.');
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  return (
+    <LinearGradient
+      colors={['#f0f9ff', '#e0f2fe', '#f0f9ff']}
+      style={styles.gradientBackground}
+    >
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <SettingsIcon size={24} color="#ffffff" />
+          </View>
+          <Text style={styles.title}>Settings</Text>
+        </View>
+
+        <View style={styles.card}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={clearAllReadings}>
+            <View style={styles.buttonIconContainer}>
+              <Trash2 size={22} color="#ffffff" />
+            </View>
+            <Text style={styles.buttonText}>Clear All Readings</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  header: {
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0284c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    letterSpacing: 0.5,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 24,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    padding: 16,
+    borderRadius: 12,
+    backgroundColor: '#fecaca',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  buttonIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#ef4444',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  buttonText: {
+    color: '#b91c1c',
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+});
+</file>
+
+<file path="app/_layout.tsx">
+import { useEffect } from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { useFrameworkReady } from '@/hooks/useFrameworkReady';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+
+export default function RootLayout() {
+  useFrameworkReady();
+
+  return (
+    <SafeAreaProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="auto" />
+    </SafeAreaProvider>
+  );
+}
+</file>
+
+<file path="app.json">
+{
+  "expo": {
+    "name": "Blood Pressure Tracker",
+    "slug": "blood-pressure-tracker",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bloodpressuretracker",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "bundleIdentifier": "com.yourcompany.bloodpressuretracker",
+      "buildNumber": "1",
+      "supportsTablet": true,
+      "infoPlist": {
+        "UIBackgroundModes": ["fetch"],
+        "NSHealthShareUsageDescription": "This app needs access to health data to save your blood pressure readings to Apple Health.",
+        "NSHealthUpdateUsageDescription": "This app needs access to health data to save your blood pressure readings to Apple Health."
+      },
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
+</file>
+
+<file path="app/(tabs)/graph.tsx">
+import { useEffect, useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  TouchableOpacity,
+  ActivityIndicator,
+  useWindowDimensions,
+  Alert,
+} from 'react-native';
+import { BarChart2 } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { LineChart } from 'react-native-chart-kit';
+import { readingsApi, BloodPressureReading } from '../services/api';
+
+type TimeRange = '3days' | 'week' | 'month';
+
+export default function GraphScreen() {
+  const [readings, setReadings] = useState<BloodPressureReading[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>('3days');
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
+  const loadReadings = async () => {
+    try {
+      setLoading(true);
+      const response = await readingsApi.getAll();
+      // Check if response is an array
+      const fetchedReadings = Array.isArray(response) ? response : [];
+      
+      // Sort by timestamp (convert ISO string to Date for comparison)
+      setReadings(fetchedReadings.sort((a, b) => 
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+      ));
+      setLoading(false);
+    } catch (error) {
+      console.error('Error loading readings:', error);
+      setLoading(false);
+      Alert.alert('Error', 'Failed to load readings');
+    }
+  };
+
+  useEffect(() => {
+    loadReadings();
+  }, []);
+
+  const getFilteredReadings = () => {
+    const now = new Date();
+    const msInDay = 24 * 60 * 60 * 1000;
+    let cutoffTime: Date;
+
+    if (timeRange === '3days') {
+      cutoffTime = new Date(now.getTime() - 3 * msInDay);
+    } else if (timeRange === 'week') {
+      cutoffTime = new Date(now.getTime() - 7 * msInDay);
+    } else { // month
+      cutoffTime = new Date(now.getTime() - 30 * msInDay);
+    }
+
+    return readings.filter(reading => new Date(reading.timestamp) >= cutoffTime);
+  };
+
+  const formatChartData = () => {
+    const filteredReadings = getFilteredReadings();
+    
+    // If no readings, return empty data
+    if (filteredReadings.length === 0) {
+      return {
+        labels: [],
+        datasets: [
+          { data: [], color: () => '#ef4444' }, // Systolic
+          { data: [], color: () => '#f59e0b' }, // Diastolic
+          { data: [], color: () => '#0284c7' }, // Heart Rate
+        ],
+        legend: ['Systolic', 'Diastolic', 'Heart Rate']
+      };
+    }
+
+    // Get labels (dates) for x-axis
+    const labels = filteredReadings.map(reading => {
+      const date = new Date(reading.timestamp);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+
+    // Get data for each dataset
+    const systolicData = filteredReadings.map(reading => reading.systolic);
+    const diastolicData = filteredReadings.map(reading => reading.diastolic);
+    const heartRateData = filteredReadings.map(reading => reading.heart_rate);
+
+    return {
+      labels,
+      datasets: [
+        { data: systolicData, color: () => '#ef4444' }, // Red for Systolic
+        { data: diastolicData, color: () => '#f59e0b' }, // Orange for Diastolic
+        { data: heartRateData, color: () => '#0284c7' }, // Blue for Heart Rate
+      ],
+      legend: ['Systolic', 'Diastolic', 'Heart Rate']
+    };
+  };
+
+  const chartConfig = {
+    backgroundGradientFrom: '#ffffff',
+    backgroundGradientTo: '#ffffff',
+    decimalPlaces: 0,
+    color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
+    style: {
+      borderRadius: 16,
+    },
+    propsForDots: {
+      r: '4',
+      strokeWidth: '2',
+    },
+  };
+
+  // Calculate chart dimensions based on orientation
+  const chartWidth = width - (isLandscape ? 48 : 32); // More padding in landscape
+  const chartHeight = isLandscape ? height * 0.5 : 220; // Adjust height in landscape
+
+  return (
+    <LinearGradient
+      colors={['#f0f9ff', '#e0f2fe', '#f0f9ff']}
+      style={styles.gradientBackground}
+    >
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
+        {!isLandscape && (
+          <View style={styles.header}>
+            <View style={styles.iconContainer}>
+              <BarChart2 size={24} color="#ffffff" />
+            </View>
+            <Text style={styles.title}>BP Trends</Text>
+          </View>
+        )}
+
+        <View style={styles.card}>
+          <View style={styles.timeRangeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.timeRangeButton,
+                timeRange === '3days' && styles.timeRangeButtonActive,
+              ]}
+              onPress={() => setTimeRange('3days')}
+            >
+              <Text
+                style={[
+                  styles.timeRangeText,
+                  timeRange === '3days' && styles.timeRangeTextActive,
+                ]}
+              >
+                3 Days
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.timeRangeButton,
+                timeRange === 'week' && styles.timeRangeButtonActive,
+              ]}
+              onPress={() => setTimeRange('week')}
+            >
+              <Text
+                style={[
+                  styles.timeRangeText,
+                  timeRange === 'week' && styles.timeRangeTextActive,
+                ]}
+              >
+                Week
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.timeRangeButton,
+                timeRange === 'month' && styles.timeRangeButtonActive,
+              ]}
+              onPress={() => setTimeRange('month')}
+            >
+              <Text
+                style={[
+                  styles.timeRangeText,
+                  timeRange === 'month' && styles.timeRangeTextActive,
+                ]}
+              >
+                Month
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#0284c7" />
+            </View>
+          ) : readings.length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No readings recorded yet</Text>
+            </View>
+          ) : getFilteredReadings().length === 0 ? (
+            <View style={styles.emptyState}>
+              <Text style={styles.emptyStateText}>No readings in selected time range</Text>
+            </View>
+          ) : (
+            <View style={styles.chartContainer}>
+              <LineChart
+                data={formatChartData()}
+                width={chartWidth}
+                height={chartHeight}
+                chartConfig={chartConfig}
+                bezier
+                style={styles.chart}
+              />
+              <View style={[
+                styles.legendContainer,
+                isLandscape && styles.legendContainerLandscape
+              ]}>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendColor, { backgroundColor: '#ef4444' }]} />
+                  <Text style={styles.legendText}>Systolic</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendColor, { backgroundColor: '#f59e0b' }]} />
+                  <Text style={styles.legendText}>Diastolic</Text>
+                </View>
+                <View style={styles.legendItem}>
+                  <View style={[styles.legendColor, { backgroundColor: '#0284c7' }]} />
+                  <Text style={styles.legendText}>Heart Rate</Text>
+                </View>
+              </View>
+            </View>
+          )}
+        </View>
+      </ScrollView>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  header: {
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0284c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    letterSpacing: 0.5,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 16,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    flex: 1,
+  },
+  timeRangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+  },
+  timeRangeButton: {
+    flex: 1,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  timeRangeButtonActive: {
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  timeRangeText: {
+    color: '#64748b',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+  timeRangeTextActive: {
+    color: '#0284c7',
+  },
+  loadingContainer: {
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyState: {
+    height: 250,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  chartContainer: {
+    alignItems: 'center',
+  },
+  chart: {
+    marginVertical: 8,
+    borderRadius: 16,
+  },
+  legendContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    marginTop: 16,
+    gap: 16,
+  },
+  legendContainerLandscape: {
+    marginTop: 8,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginHorizontal: 8,
+  },
+  legendColor: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 6,
+  },
+  legendText: {
+    color: '#334155',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+});
+</file>
+
+<file path="package.json">
+{
+  "name": "bolt-expo-starter",
+  "main": "expo-router/entry",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "EXPO_NO_TELEMETRY=1 expo start",
+    "build:web": "expo export --platform web",
+    "lint": "expo lint"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "^14.0.2",
+    "@lucide/lab": "^0.1.2",
+    "@react-native-async-storage/async-storage": "^1.21.0",
+    "@react-native-community/datetimepicker": "7.6.1",
+    "@react-navigation/bottom-tabs": "^7.2.0",
+    "@react-navigation/native": "^7.0.14",
+    "axios": "^1.8.4",
+    "expo": "52.0.33",
+    "expo-blur": "^14.0.3",
+    "expo-camera": "^16.0.18",
+    "expo-constants": "^17.0.5",
+    "expo-font": "^13.0.3",
+    "expo-haptics": "^14.0.1",
+    "expo-linear-gradient": "^14.0.2",
+    "expo-linking": "^7.0.5",
+    "expo-router": "4.0.17",
+    "expo-splash-screen": "^0.29.21",
+    "expo-status-bar": "^2.0.1",
+    "expo-symbols": "^0.2.2",
+    "expo-system-ui": "^4.0.7",
+    "expo-web-browser": "^14.0.2",
+    "lucide-react-native": "^0.475.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "react-native": "0.76.6",
+    "react-native-chart-kit": "^6.12.0",
+    "react-native-gesture-handler": "^2.23.0",
+    "react-native-reanimated": "^3.16.7",
+    "react-native-safe-area-context": "4.12.0",
+    "react-native-screens": "^4.4.0",
+    "react-native-svg": "^15.11.1",
+    "react-native-url-polyfill": "^2.0.0",
+    "react-native-web": "^0.19.13",
+    "react-native-webview": "13.12.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@types/react": "~18.3.12",
+    "typescript": "^5.3.3"
+  }
+}
+</file>
+
+<file path="README.md">
+NOTE: this was built almost entirely by Cline (with Claude 3.7 Sonnet). I also used bolt.new to create the very first bare-bones skeleton of the app. The intent was to test Cline's agentic capabilities. Conclusion: they are quite impressive! "Meesa likes!"
+
+# Blood Pressure Tracker
+
+A mobile application for tracking and visualizing blood pressure readings over time. Built with React Native and Expo.
+
+## Features
+
+- **Record Blood Pressure Readings**: Easily input systolic, diastolic, and heart rate values with date and time
+- **View Reading History**: See all your past readings with color-coded status indicators
+- **Visualize Trends**: Track your blood pressure trends over time with graphs
+- **Edit and Annotate**: Add notes to readings and edit past entries
+- **Data Persistence**: All readings are stored in a PostgreSQL database via the bptracker-backend API
+- **Platforms Supported**: iOS, Android, Web
+
+## Screenshots
+
+
+### Record Screen
+*Screenshot showing the main recording interface where users can input blood pressure values*
+
+<img src="./assets/images/record.png" width="50%" alt="record">
+
+### History Screen
+*Screenshot showing the history view with color-coded readings*
+
+<img src="./assets/images/history.png" width="50%" alt="history">
+
+### Graph Screen
+*Screenshot showing the trend visualization with the line chart*
+
+<img src="./assets/images/graph.png" width="50%" alt="graph">
+
+
+### Settings Screen
+*Screenshot showing the settings interface*
+
+<img src="./assets/images/settings.png" width="50%" alt="settings">
+
+## Backend Integration
+
+This application uses the [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) API to store blood pressure readings in a PostgreSQL database. The backend provides RESTful endpoints for creating, reading, updating, and deleting blood pressure readings.
+
+### Important Note for Developers
+
+Before running the application, you must start the bptracker-backend server:
+
+1. Clone the backend repository: `git clone https://github.com/dudeinthemirror/bptracker-backend.git`
+2. Follow the setup instructions in the backend repository's README
+3. Start the backend server
+4. Once the backend server is running, you can start this application
+
+The application is configured to connect to the backend at `http://127.0.0.1:8078`. If your backend is running on a different host or port, update the `API_BASE_URL` in `app/services/api.ts`.
+
+## Developer Guide
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v14 or newer)
+- [npm](https://www.npmjs.com/) or [Yarn](https://yarnpkg.com/)
+- [Expo CLI](https://docs.expo.dev/workflow/expo-cli/)
+- [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) server running
+
+### Setup and Running Locally
+
+1. **Clone the repository**
+
+   ```bash
+   git clone https://github.com/dudeinthemirror/bptracker.git
+   cd bptracker
+   ```
+
+2. **Install dependencies**
+
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
+
+3. **Start the development server**
+
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
+
+4. **Running on a device or emulator**
+
+   - Install the Expo Go app on your iOS or Android device
+   - Scan the QR code from the terminal with your device
+   - Alternatively, press 'a' to open on an Android emulator or 'i' for iOS simulator
+
+### Project Structure
+
+- `app/` - Main application code
+  - `(tabs)/` - Tab-based navigation screens
+    - `index.tsx` - Record screen (main screen)
+    - `history.tsx` - History of readings
+    - `graph.tsx` - Visualization of blood pressure trends
+    - `settings.tsx` - App settings
+  - `_layout.tsx` - Navigation layout configuration
+- `assets/` - Images and other static assets
+- `hooks/` - Custom React hooks
+
+### Building for Production
+
+To create a production build:
+
+```bash
+# For web
+npm run build:web
+# or
+yarn build:web
+
+# For iOS/Android
+expo build:ios
+expo build:android
+```
+
+## Technologies Used
+
+- [React Native](https://reactnative.dev/)
+- [Expo](https://expo.dev/)
+- [React Navigation](https://reactnavigation.org/)
+- [Axios](https://axios-http.com/) - HTTP client for API requests
+- [react-native-chart-kit](https://github.com/indiespirit/react-native-chart-kit)
+- [Lucide Icons](https://lucide.dev/)
+- [Expo Linear Gradient](https://docs.expo.dev/versions/latest/sdk/linear-gradient/)
+- [bptracker-backend](https://github.com/dudeinthemirror/bptracker-backend) - Backend API server
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+</file>
+
+<file path="app/(tabs)/_layout.tsx">
+import { Tabs } from 'expo-router';
+import { Chrome as Home, History, Settings, BarChart2 } from 'lucide-react-native';
+import { BlurView } from 'expo-blur';
+import { StyleSheet, View, useWindowDimensions, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+export default function TabLayout() {
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const insets = useSafeAreaInsets();
+  return (
+    <Tabs
+      screenOptions={{
+        tabBarStyle: {
+          position: 'absolute',
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          borderTopColor: 'rgba(255, 255, 255, 0.3)',
+          borderTopWidth: 1,
+          elevation: 0,
+          height: isLandscape ? 45 : 60, // Reduce height in landscape mode
+          shadowColor: '#000',
+          shadowOffset: {
+            width: 0,
+            height: -2,
+          },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          paddingBottom: isLandscape ? 4 : Math.max(10, insets.bottom), // Add padding for home indicator
+        },
+        tabBarBackground: () => (
+          <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+        ),
+        tabBarActiveTintColor: '#0284c7',
+        tabBarInactiveTintColor: '#64748b',
+        tabBarLabelStyle: {
+          fontSize: isLandscape ? 10 : 12,
+          fontWeight: '500',
+          marginBottom: isLandscape ? 2 : 4,
+        },
+        tabBarItemStyle: {
+          paddingVertical: isLandscape ? 3 : 6,
+        },
+        headerStyle: {
+          backgroundColor: 'rgba(255, 255, 255, 0.8)',
+          elevation: 0,
+          shadowOpacity: 0,
+          borderBottomWidth: 0,
+        },
+        headerTitleStyle: {
+          color: '#0c4a6e',
+          fontSize: 18,
+          fontWeight: '700',
+        },
+        headerBackground: () => (
+          <BlurView intensity={30} tint="light" style={StyleSheet.absoluteFill} />
+        ),
+      }}>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: 'Record',
+          tabBarIcon: ({ color, size }) => (
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <Home size={isLandscape ? size-4 : size-2} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="history"
+        options={{
+          title: 'History',
+          tabBarIcon: ({ color, size }) => (
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <History size={isLandscape ? size-4 : size-2} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="graph"
+        options={{
+          title: 'Graph',
+          tabBarIcon: ({ color, size }) => (
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <BarChart2 size={isLandscape ? size-4 : size-2} color={color} />
+            </View>
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          tabBarIcon: ({ color, size }) => (
+            <View style={[styles.iconWrapper, isLandscape && styles.iconWrapperLandscape]}>
+              <Settings size={isLandscape ? size-4 : size-2} color={color} />
+            </View>
+          ),
+        }}
+      />
+    </Tabs>
+  );
+}
+
+const styles = StyleSheet.create({
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 4,
+  },
+  iconWrapperLandscape: {
+    marginTop: 2,
+  },
+});
+</file>
+
+<file path="app/(tabs)/index.tsx">
+import { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  Platform,
+  Modal,
+  Pressable,
+  Alert,
+} from 'react-native';
+import { Heart, Calendar, Clock } from 'lucide-react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { LinearGradient } from 'expo-linear-gradient';
+import { readingsApi, BloodPressureReading } from '../services/api';
+
+export default function RecordScreen() {
+  const [systolic, setSystolic] = useState('');
+  const [diastolic, setDiastolic] = useState('');
+  const [heartRate, setHeartRate] = useState('');
+  const [note, setNote] = useState('');
+  const [date, setDate] = useState(new Date());
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+
+  const saveReading = async () => {
+    try {
+      if (!systolic || !diastolic || !heartRate) {
+        return;
+      }
+
+      const reading = {
+        systolic: parseInt(systolic),
+        diastolic: parseInt(diastolic),
+        heart_rate: parseInt(heartRate),
+        timestamp: date.toISOString(),
+        note: note.trim() || undefined,
+      };
+
+      await readingsApi.create(reading);
+
+      // Reset form
+      setSystolic('');
+      setDiastolic('');
+      setHeartRate('');
+      setNote('');
+      setDate(new Date());
+      
+      Alert.alert('Success', 'Reading saved successfully');
+    } catch (error) {
+      console.error('Error saving reading:', error);
+      Alert.alert('Error', 'Failed to save reading. Please try again.');
+    }
+  };
+
+  const onDateChange = (event: any, selectedDate?: Date) => {
+    const currentDate = selectedDate || date;
+    if (Platform.OS === 'android') {
+      setShowDatePicker(false);
+      setShowTimePicker(false);
+    }
+    setDate(currentDate);
+  };
+
+  const formatDate = (date: Date) => {
+    return date.toLocaleDateString(undefined, {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+  };
+
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString(undefined, {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  return (
+    <LinearGradient
+      colors={['#f0f9ff', '#e0f2fe', '#f0f9ff']}
+      style={styles.gradientBackground}
+    >
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Heart size={24} color="#ffffff" />
+          </View>
+          <Text style={styles.title}>BP Reading</Text>
+        </View>
+
+        <View style={styles.card}>
+          <View style={styles.dateTimeContainer}>
+            <TouchableOpacity
+              style={styles.dateTimeButton}
+              onPress={() => setShowDatePicker(true)}>
+              <Calendar size={20} color="#0284c7" />
+              <Text style={styles.dateTimeText}>{formatDate(date)}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={styles.dateTimeButton}
+              onPress={() => setShowTimePicker(true)}>
+              <Clock size={20} color="#0284c7" />
+              <Text style={styles.dateTimeText}>{formatTime(date)}</Text>
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Systolic (mmHg)</Text>
+            <TextInput
+              style={styles.input}
+              value={systolic}
+              onChangeText={setSystolic}
+              keyboardType="numeric"
+              placeholder="120"
+              placeholderTextColor="#94a3b8"
+              maxLength={3}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Diastolic (mmHg)</Text>
+            <TextInput
+              style={styles.input}
+              value={diastolic}
+              onChangeText={setDiastolic}
+              keyboardType="numeric"
+              placeholder="80"
+              placeholderTextColor="#94a3b8"
+              maxLength={3}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Heart Rate (BPM)</Text>
+            <TextInput
+              style={styles.input}
+              value={heartRate}
+              onChangeText={setHeartRate}
+              keyboardType="numeric"
+              placeholder="75"
+              placeholderTextColor="#94a3b8"
+              maxLength={3}
+            />
+          </View>
+
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Note (optional)</Text>
+            <TextInput
+              style={styles.input}
+              value={note}
+              onChangeText={setNote}
+              placeholder="Add a note about this reading"
+              placeholderTextColor="#94a3b8"
+              multiline={true}
+              numberOfLines={2}
+            />
+          </View>
+
+          <LinearGradient
+            colors={(!systolic || !diastolic || !heartRate) ? ['#94a3b8', '#64748b'] : ['#0284c7', '#0369a1']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[
+              styles.buttonGradient,
+              (!systolic || !diastolic || !heartRate) && styles.buttonDisabled,
+            ]}
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={saveReading}
+              disabled={!systolic || !diastolic || !heartRate}>
+              <Text style={styles.buttonText}>Save Reading</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      </ScrollView>
+
+      {/* Date/Time Picker Modal for iOS and Web */}
+      {(showDatePicker || showTimePicker) && (Platform.OS === 'web' || Platform.OS === 'ios') && (
+        <Modal
+          transparent={true}
+          visible={showDatePicker || showTimePicker}
+          animationType="fade">
+          <Pressable
+            style={styles.modalOverlay}
+            onPress={() => {
+              setShowDatePicker(false);
+              setShowTimePicker(false);
+            }}>
+            <View style={styles.modalContent}>
+              <DateTimePicker
+                value={date}
+                mode={showDatePicker ? 'date' : 'time'}
+                display="spinner"
+                onChange={onDateChange}
+                style={styles.picker}
+              />
+              <LinearGradient
+                colors={['#0284c7', '#0369a1']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.doneButtonGradient}
+              >
+                <TouchableOpacity
+                  style={styles.doneButton}
+                  onPress={() => {
+                    setShowDatePicker(false);
+                    setShowTimePicker(false);
+                  }}>
+                  <Text style={styles.doneButtonText}>Done</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          </Pressable>
+        </Modal>
+      )}
+
+      {/* Date/Time Picker for Android */}
+      {(showDatePicker || showTimePicker) && Platform.OS === 'android' && (
+        <DateTimePicker
+          value={date}
+          mode={showDatePicker ? 'date' : 'time'}
+          onChange={onDateChange}
+        />
+      )}
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 24,
+  },
+  header: {
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    width: '100%',
+    flexWrap: 'nowrap',
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0284c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    letterSpacing: 0.5,
+    flexShrink: 1,
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 16,
+    padding: 24,
+    margin: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  dateTimeContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
+  },
+  dateTimeButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  dateTimeText: {
+    color: '#0c4a6e',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  inputGroup: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: '#0c4a6e',
+    fontWeight: '600',
+    letterSpacing: 0.3,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#bae6fd',
+    borderRadius: 12,
+    padding: 14,
+    fontSize: 18,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    color: '#0c4a6e',
+    fontWeight: '500',
+  },
+  buttonGradient: {
+    borderRadius: 12,
+    marginTop: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 4,
+  },
+  button: {
+    padding: 16,
+    alignItems: 'center',
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  buttonText: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  picker: {
+    height: 200,
+  },
+  doneButtonGradient: {
+    borderRadius: 12,
+    marginTop: 16,
+  },
+  doneButton: {
+    padding: 14,
+    alignItems: 'center',
+  },
+  doneButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
+    letterSpacing: 0.5,
+  },
+});
+</file>
+
+<file path="app/(tabs)/history.tsx">
+import { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  RefreshControl,
+  TouchableOpacity,
+  Modal,
+  Pressable,
+  TextInput,
+  Alert,
+  useWindowDimensions,
+} from 'react-native';
+import { Activity, X, FileText } from 'lucide-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { readingsApi, BloodPressureReading } from '../services/api';
+
+export default function HistoryScreen() {
+  const [readings, setReadings] = useState<BloodPressureReading[]>([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+  const [selectedStatus, setSelectedStatus] = useState<{
+    color: string;
+    title: string;
+    description: string;
+  } | null>(null);
+  const [noteModalVisible, setNoteModalVisible] = useState(false);
+  const [selectedNote, setSelectedNote] = useState<string | null>(null);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editingReading, setEditingReading] = useState<BloodPressureReading | null>(null);
+  const [editedSystolic, setEditedSystolic] = useState<string>('');
+  const [editedDiastolic, setEditedDiastolic] = useState<string>('');
+  const [editedHeartRate, setEditedHeartRate] = useState<string>('');
+  const [editedNote, setEditedNote] = useState('');
+
+  const handleEditReading = (reading: BloodPressureReading) => {
+    setEditingReading(reading);
+    setEditedSystolic(reading.systolic.toString());
+    setEditedDiastolic(reading.diastolic.toString());
+    setEditedHeartRate(reading.heart_rate.toString());
+    setEditedNote(reading.note || '');
+    setEditModalVisible(true);
+  };
+
+  const saveEditedReading = async () => {
+    if (!editingReading) return;
+    
+    // Validate inputs
+    if (!editedSystolic || !editedDiastolic || !editedHeartRate) {
+      Alert.alert('Error', 'All fields except note are required');
+      return;
+    }
+
+    try {
+      // Create updated reading
+      const updatedReading = {
+        systolic: parseInt(editedSystolic),
+        diastolic: parseInt(editedDiastolic),
+        heart_rate: parseInt(editedHeartRate),
+        note: editedNote || undefined,
+        // We don't need to include timestamp as we're not changing it
+      };
+
+      // Update the reading via API
+      await readingsApi.update(editingReading.id, updatedReading);
+      
+      // Refresh readings
+      await loadReadings();
+      
+      // Close modal
+      setEditModalVisible(false);
+      setEditingReading(null);
+      
+      Alert.alert('Success', 'Reading updated successfully');
+    } catch (error) {
+      console.error('Error saving edited reading:', error);
+      Alert.alert('Error', 'Failed to save changes');
+    }
+  };
+
+  const loadReadings = async () => {
+    try {
+      setRefreshing(true);
+      const response = await readingsApi.getAll();
+      // Check if response is an array
+      const fetchedReadings = Array.isArray(response) ? response : [];
+      
+      // Sort by timestamp (convert ISO string to Date for comparison)
+      setReadings(fetchedReadings.sort((a, b) => 
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      ));
+      setRefreshing(false);
+    } catch (error) {
+      console.error('Error loading readings:', error);
+      setRefreshing(false);
+      Alert.alert('Error', 'Failed to load readings');
+    }
+  };
+
+  const onRefresh = () => {
+    loadReadings();
+  };
+
+  useEffect(() => {
+    loadReadings();
+  }, []);
+
+  const formatDate = (timestamp: string) => {
+    return new Date(timestamp).toLocaleString(undefined, {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+  };
+
+  const getStatusInfo = (systolic: number, diastolic: number) => {
+    if (systolic >= 140 || diastolic >= 90) {
+      return {
+        color: '#ef4444',
+        title: 'High Blood Pressure',
+        description: 'Systolic ≥ 140 or Diastolic ≥ 90. Consider consulting with a healthcare professional.'
+      };
+    }
+    if (systolic >= 120 || diastolic >= 80) {
+      return {
+        color: '#f59e0b',
+        title: 'Elevated Blood Pressure',
+        description: 'Systolic 120-139 or Diastolic 80-89. Consider lifestyle changes to lower your blood pressure.'
+      };
+    }
+    return {
+      color: '#22c55e',
+      title: 'Normal Blood Pressure',
+      description: 'Systolic < 120 and Diastolic < 80. Keep up the good work!'
+    };
+  };
+  
+  const showStatusModal = (systolic: number, diastolic: number) => {
+    const statusInfo = getStatusInfo(systolic, diastolic);
+    setSelectedStatus(statusInfo);
+    setStatusModalVisible(true);
+  };
+
+  return (
+    <LinearGradient
+      colors={['#f0f9ff', '#e0f2fe', '#f0f9ff']}
+      style={styles.gradientBackground}
+    >
+      <ScrollView 
+        style={styles.container}
+        contentContainerStyle={styles.contentContainer}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Activity size={24} color="#ffffff" />
+          </View>
+          <Text style={styles.title}>Reading History</Text>
+        </View>
+
+        {readings.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>No readings recorded yet</Text>
+          </View>
+        ) : (
+          readings.map((reading) => {
+            const systolicNum = reading.systolic;
+            const diastolicNum = reading.diastolic;
+            const statusInfo = getStatusInfo(systolicNum, diastolicNum);
+            
+            return (
+              <TouchableOpacity 
+                key={reading.id} 
+                style={[
+                  styles.card,
+                  isLandscape && styles.cardLandscape
+                ]}
+                onPress={() => handleEditReading(reading)}
+                activeOpacity={0.7}
+              >
+                <View style={styles.readingHeader}>
+                  <Text style={styles.timestamp}>{formatDate(reading.timestamp)}</Text>
+                  <TouchableOpacity
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      showStatusModal(systolicNum, diastolicNum);
+                    }}
+                    activeOpacity={0.7}
+                  >
+                    <View
+                      style={[
+                        styles.statusDot,
+                        { backgroundColor: statusInfo.color },
+                      ]}
+                    />
+                  </TouchableOpacity>
+                </View>
+                
+                <View style={styles.readings}>
+                  <View style={styles.readingItem}>
+                    <Text style={styles.readingValue}>{reading.systolic}</Text>
+                    <Text style={styles.readingLabel}>Systolic</Text>
+                  </View>
+                  
+                  <View style={[styles.divider, { backgroundColor: statusInfo.color }]} />
+                  
+                  <View style={styles.readingItem}>
+                    <Text style={styles.readingValue}>{reading.diastolic}</Text>
+                    <Text style={styles.readingLabel}>Diastolic</Text>
+                  </View>
+                  
+                  <View style={[styles.divider, { backgroundColor: statusInfo.color }]} />
+                  
+                  <View style={styles.readingItem}>
+                    <Text style={styles.readingValue}>{reading.heart_rate}</Text>
+                    <Text style={styles.readingLabel}>Heart Rate</Text>
+                  </View>
+                </View>
+                
+                {reading.note && (
+                  <TouchableOpacity 
+                    style={styles.noteIconContainer}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      setSelectedNote(reading.note || null);
+                      setNoteModalVisible(true);
+                    }}
+                  >
+                    <FileText size={20} color="#0284c7" />
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            );
+          })
+        )}
+      </ScrollView>
+      
+      <Modal
+        transparent={true}
+        visible={statusModalVisible}
+        animationType="fade"
+        onRequestClose={() => setStatusModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setStatusModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <View style={[styles.modalStatusIndicator, { backgroundColor: selectedStatus?.color }]} />
+              <Text style={styles.modalTitle}>{selectedStatus?.title}</Text>
+              <TouchableOpacity
+                onPress={() => setStatusModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>{selectedStatus?.description}</Text>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={noteModalVisible}
+        animationType="fade"
+        onRequestClose={() => setNoteModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => setNoteModalVisible(false)}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Note</Text>
+              <TouchableOpacity
+                onPress={() => setNoteModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.modalDescription}>{selectedNote}</Text>
+          </View>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        transparent={true}
+        visible={editModalVisible}
+        animationType="fade"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <Pressable
+          style={styles.modalOverlay}
+          onPress={() => {}}
+        >
+          <View style={styles.editModalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Edit Reading</Text>
+              <TouchableOpacity
+                onPress={() => setEditModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <X size={20} color="#64748b" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Systolic</Text>
+              <TextInput
+                style={styles.input}
+                value={editedSystolic}
+                onChangeText={setEditedSystolic}
+                keyboardType="numeric"
+                placeholder="Systolic"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Diastolic</Text>
+              <TextInput
+                style={styles.input}
+                value={editedDiastolic}
+                onChangeText={setEditedDiastolic}
+                keyboardType="numeric"
+                placeholder="Diastolic"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Heart Rate</Text>
+              <TextInput
+                style={styles.input}
+                value={editedHeartRate}
+                onChangeText={setEditedHeartRate}
+                keyboardType="numeric"
+                placeholder="Heart Rate"
+              />
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.inputLabel}>Note (optional)</Text>
+              <TextInput
+                style={[styles.input, styles.noteInput]}
+                value={editedNote}
+                onChangeText={setEditedNote}
+                placeholder="Add a note"
+                multiline
+              />
+            </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={[styles.button, styles.cancelButton]}
+                onPress={() => setEditModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity
+                style={[styles.button, styles.saveButton]}
+                onPress={saveEditedReading}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
+    </LinearGradient>
+  );
+}
+
+const styles = StyleSheet.create({
+  gradientBackground: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
+  contentContainer: {
+    paddingBottom: 80,
+  },
+  header: {
+    padding: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: '#0284c7',
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    letterSpacing: 0.5,
+  },
+  emptyState: {
+    padding: 24,
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    margin: 16,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  emptyStateText: {
+    fontSize: 16,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  card: {
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 18,
+    padding: 20,
+    margin: 16,
+    marginTop: 0,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  cardLandscape: {
+    width: '85%',
+    alignSelf: 'center',
+    marginHorizontal: 'auto',
+  },
+  readingHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  timestamp: {
+    fontSize: 14,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+  statusDot: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 1,
+    elevation: 1,
+  },
+  readings: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  readingItem: {
+    alignItems: 'center',
+    flex: 1,
+  },
+  divider: {
+    width: 1,
+    height: 40,
+    backgroundColor: '#cbd5e1',
+    opacity: 0.6,
+  },
+  readingValue: {
+    fontSize: 28,
+    fontWeight: '700',
+    color: '#0c4a6e',
+  },
+  readingLabel: {
+    fontSize: 14,
+    color: '#64748b',
+    marginTop: 6,
+    fontWeight: '500',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '85%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  modalStatusIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#0c4a6e',
+    flex: 1,
+  },
+  closeButton: {
+    padding: 4,
+  },
+  modalDescription: {
+    fontSize: 16,
+    lineHeight: 24,
+    color: '#334155',
+  },
+  noteIconContainer: {
+    position: 'absolute',
+    bottom: -1,
+    right: -1,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 20,
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  editModalContent: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
+    padding: 24,
+    width: '90%',
+    maxWidth: 450,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#0c4a6e',
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: '#f1f5f9',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: '#334155',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+  noteInput: {
+    minHeight: 80,
+    textAlignVertical: 'top',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 24,
+  },
+  button: {
+    borderRadius: 8,
+    padding: 14,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButton: {
+    backgroundColor: '#f1f5f9',
+    marginRight: 12,
+  },
+  saveButton: {
+    backgroundColor: '#0284c7',
+    marginLeft: 12,
+  },
+  cancelButtonText: {
+    color: '#64748b',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  saveButtonText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 16,
+  },
+});
+</file>
+
+</files>
